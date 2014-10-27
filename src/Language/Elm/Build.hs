@@ -10,6 +10,8 @@ import qualified Data.Map as Map
 import Control.Monad (filterM)
 import Data.Maybe (fromJust)
 
+import qualified Language.Haskell.TH as TH
+
 
 elmModuleName :: String -> Either String Elm.Compiler.Module.Name
 elmModuleName modul = do
@@ -69,6 +71,11 @@ compileAll modules = do
     let orderedSources = map (fromJust . (flip Map.lookup $ nameDict)) orderedNames
     compileInOrder orderedSources
 
+deriveElmJS :: [String] -> TH.ExpQ
+deriveElmJS modules = case compileAll modules of
+    Right s -> TH.litE $ TH.stringL s
+    Left err -> error $ "Error compiling Elm code:\n" ++ err
+    
 
 compileInOrder :: [String] -> Either String String
 compileInOrder modules = helper modules Map.empty ""
