@@ -1,4 +1,4 @@
-module Language.Elm.Build where
+module Language.Elm.Build (compileAll) where
 
 import qualified Data.Map as Map
 
@@ -8,6 +8,7 @@ import qualified Data.Set as Set
 import qualified Data.Map as Map
 
 import Control.Monad (filterM)
+import Data.Maybe (fromJust)
 
 
 elmModuleName :: String -> Either String Elm.Compiler.Module.Name
@@ -18,8 +19,8 @@ elmModuleName modul = do
 
 
 --Reorder the dependencies so that we can compile them in order
-resolveDependnecies :: [String] -> Either String [Name]
-resolveDependnecies deps = do
+resolveDependencies :: [String] -> Either String [Name]
+resolveDependencies deps = do
     edgePairs <- mapM parseDependencies deps
     let names = map fst edgePairs
     let edgeMap = Map.fromList edgePairs
@@ -59,6 +60,15 @@ resolveDependnecies deps = do
     topSort initialVisitedNodes initialOpenList initialResult
                         
         
+compileAll :: [String] -> Either String String
+compileAll modules = do
+    nameDeps <- mapM parseDependencies modules
+    let names = map fst nameDeps
+    let nameDict = Map.fromList $ zip names modules
+    orderedNames <- resolveDependencies modules
+    let orderedSources = map (fromJust . (flip Map.lookup $ nameDict)) orderedNames
+    compileInOrder orderedSources
+
 
 compileInOrder :: [String] -> Either String String
 compileInOrder modules = helper modules Map.empty ""
