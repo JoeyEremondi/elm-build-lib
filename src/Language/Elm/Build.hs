@@ -1,4 +1,4 @@
-module Language.Elm.Build (compileAll) where
+module Language.Elm.Build (compileAll, deriveElmJS) where
 
 import qualified Data.Map as Map
 
@@ -11,6 +11,7 @@ import Control.Monad (filterM)
 import Data.Maybe (fromJust)
 
 import qualified Language.Haskell.TH as TH
+import Language.Haskell.TH.Quote 
 
 
 elmModuleName :: String -> Either String Elm.Compiler.Module.Name
@@ -75,7 +76,13 @@ deriveElmJS :: [String] -> TH.ExpQ
 deriveElmJS modules = case compileAll modules of
     Right s -> TH.litE $ TH.stringL s
     Left err -> error $ "Error compiling Elm code:\n" ++ err
-    
+
+elmQuasi :: QuasiQuoter
+elmQuasi = QuasiQuoter { quoteExp = \s -> deriveElmJS [s],
+                       quotePat = \s -> TH.litP $ TH.stringL s,
+                       quoteType = \s -> error "Can't use Elm quasiQuoter in type position",
+                       quoteDec = \s -> error "Can't use Elm quasiQuoter in dec position"
+                       }
 
 compileInOrder :: [String] -> Either String String
 compileInOrder modules = helper modules Map.empty ""
