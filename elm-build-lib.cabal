@@ -1,0 +1,37 @@
+Name: elm-build-lib
+Version: 0.0.2
+Synopsis:       Elm compiler wrapper
+Description:     Wrappers around the Elm binary to compile elm source strings into Javascript within Haskell
+Homepage: http://github.com/JoeyEremondi/elm-build-lib
+
+License: BSD3
+License-file: LICENSE
+
+name:           elm-build-lib
+version:        0.0.2
+cabal-version:  >=1.6
+build-type:     Simple
+author:         Joey Eremondi
+Maintainer:     joey@eremondi.com
+Copyright:      Copyright: (c) 2014 Joey Eremondi
+
+Category: Compiler, Language
+
+
+source-repository head
+  type: git
+  location: git://github.com/JoeyEremondi/elm-build-lib
+
+
+
+library
+  exposed-modules: Language.Elm.Build
+  hs-source-dirs:  src
+  build-depends:   base >=4.2 && <5
+                   --, Elm
+                   --, directory
+                   --, process
+                   --, temporary
+                   --, text
+  ghc-options:     -Wall
+
