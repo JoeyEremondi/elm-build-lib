@@ -30,6 +30,7 @@ library
   build-depends:   base >=4.2 && <5
                    , elm-compiler
                    , containers
+                   , template-haskell
                    --, directory
                    --, process
                    --, temporary
