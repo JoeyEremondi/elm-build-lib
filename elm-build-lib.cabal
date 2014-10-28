@@ -28,7 +28,7 @@ library
   exposed-modules: Language.Elm.Build
   hs-source-dirs:  src
   build-depends:   base >=4.2 && <5
-                   --, Elm
+                   , elm-compiler
                    --, directory
                    --, process
                    --, temporary
