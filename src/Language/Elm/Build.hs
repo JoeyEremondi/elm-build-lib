@@ -54,7 +54,7 @@ resolveDependencies deps = do
                 currentEdges <- eitherLookUp current edgeMap
                 let alreadySeen = filter (flip Set.member $ visited) currentEdges
                 case alreadySeen of
-                    [] -> Left "Error: you have a dependency cycle. Your program cannot be compiled"
+                    (_:_) -> Left "Error: you have a dependency cycle. Your program cannot be compiled"
                     _ -> do
                         let newVisited = Set.insert current visited
                         newSources <- filterM (seenAllPred newVisited) currentEdges
