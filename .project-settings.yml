@@ -21,6 +21,6 @@ extra-packages: ! 'Hackage: prettyclass 1.0.0.0
 
   Hackage: cheapskate 0.1.0.1
 
-  Git: https://github.com/elm-lang/Elm.git 4e1cde74a4'
+  Git: https://github.com/elm-lang/elm-compiler.git e547fdd13262514b1b8131b12f3fd15cf685ff0f'
 ghc-args: []
 excluded-modules: []

@@ -90,7 +90,7 @@ compileInOrder modules = helper modules Map.empty ""
       helper [] _ src = return src
       helper (modul:otherModules) compiledModules _ = do
           name <- elmModuleName modul
-          (newModule, src) <- compile modul compiledModules
+          (newModule, src) <- compile "" "" modul compiledModules
           let newCompiled = Map.insert name newModule compiledModules
           helper otherModules newCompiled src   
           
