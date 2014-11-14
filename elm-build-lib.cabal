@@ -26,11 +26,15 @@ source-repository head
 
 library
   exposed-modules: Language.Elm.Build
+  other-modules: Language.Elm.CoreLibs
+                 Language.Elm.BuildUtil
   hs-source-dirs:  src
   build-depends:   base >=4.2 && <5
                    , elm-compiler
                    , containers
                    , template-haskell
+                   , file-embed
+                   , bytestring
                    --, directory
                    --, process
                    --, temporary

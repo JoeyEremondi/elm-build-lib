@@ -13,11 +13,9 @@ import Data.Maybe (fromJust)
 import qualified Language.Haskell.TH as TH
 import Language.Haskell.TH.Quote 
 
+import Language.Elm.BuildUtil
+import Language.Elm.CoreLibs
 
-elmModuleName :: String -> Either String Elm.Compiler.Module.Name
-elmModuleName modul = do
-    (name, _) <- parseDependencies modul
-    return name
 
 
 
@@ -85,7 +83,7 @@ elmQuasi = QuasiQuoter { quoteExp = \s -> deriveElmJS [s],
                        }
 
 compileInOrder :: [String] -> Either String String
-compileInOrder modules = helper modules Map.empty ""
+compileInOrder modules = helper modules stdLib ""
     where
       helper [] _ src = return src
       helper (modul:otherModules) compiledModules _ = do

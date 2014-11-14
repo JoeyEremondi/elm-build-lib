@@ -1,9 +1,19 @@
  {-# LANGUAGE TemplateHaskell #-}
  module Language.Elm.CoreLibs where
    
-   import Data.FileEmbed
-   
-   sources =  [$(embedFile  "core/src/Array.elm")
+import Data.FileEmbed
+import Language.Elm.BuildUtil
+
+import Elm.Compiler
+import Elm.Compiler.Module
+
+import qualified Data.Map as Map
+import Control.Monad
+
+import Data.ByteString.Char8 (unpack)
+  
+
+sources = map unpack [$(embedFile  "core/src/Array.elm")
    ,$(embedFile  "core/src/Array.elm")
    ,$(embedFile  "core/src/Basics.elm")
    ,$(embedFile  "core/src/Bitwise.elm")
@@ -40,5 +50,18 @@
    
    ,$(embedFile  "core/src/Graphics/Input/Field.elm")
    ]
+
    
-   --jsSources = 
+   
+stdLib :: Map.Map Name Interface
+stdLib = case eitherLib of
+  Left s -> error $ "Failed building standard library: " ++ s
+  Right dict -> dict
+  where 
+      eitherLib = do
+        names <- mapM elmModuleName sources
+        compiledList <- mapM (\s ->  compile "elm-lang" "core" s Map.empty) sources
+        let ifaces = map fst compiledList
+        let pairs = zip names ifaces
+        return $ Map.fromList pairs
+     --jsSources = 
