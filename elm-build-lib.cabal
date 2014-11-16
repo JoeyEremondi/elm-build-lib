@@ -17,42 +17,13 @@ Copyright:      Copyright: (c) 2014 Joey Eremondi
 
 Category: Compiler, Language
 
-Extra-source-files: core/src/Array.elm
-    ,core/src/Array.elm
-    ,core/src/Basics.elm
-    ,core/src/Bitwise.elm
-    ,core/src/Char.elm
-    ,core/src/Color.elm
-    ,core/src/Date.elm
-    ,core/src/Debug.elm
-    ,core/src/Dict.elm
-    ,core/src/Http.elm
-    ,core/src/Keyboard.elm
-    ,core/src/List.elm
-    ,core/src/Maybe.elm
-    ,core/src/Mouse.elm
-    ,core/src/Random.elm
-    ,core/src/Regex.elm
-    ,core/src/Result.elm
-    ,core/src/Set.elm
-    ,core/src/Signal.elm
-    ,core/src/String.elm
-    ,core/src/Text.elm
-    ,core/src/Time.elm
-    ,core/src/Touch.elm
-    ,core/src/Trampoline.elm
-    ,core/src/Transform2D.elm
-    ,core/src/WebSocket.elm
-    ,core/src/Window.elm
+Extra-source-files: core/src/*.elm
+    
+    ,core/src/Json/*.elm
+
+    ,core/src/Graphics/*.elm
      
-    ,core/src/Json/Encode.elm
-    ,core/src/Json/Decode.elm
-     
-    ,core/src/Graphics/Collage.elm
-    ,core/src/Graphics/Element.elm
-    ,core/src/Graphics/Input.elm
-     
-    ,core/src/Graphics/Input/Field.elm
+    ,core/src/Graphics/Input/*.elm
 
 source-repository head
   type: git
