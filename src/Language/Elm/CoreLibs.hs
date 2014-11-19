@@ -11,8 +11,6 @@ import qualified Data.Map as Map
 import Control.Monad
 
 import Data.ByteString.Char8 (unpack)
-
-import Debug.Trace (trace)
   
 
 sources = map unpack [$(embedFile  "core/src/Array.elm")
@@ -53,20 +51,14 @@ sources = map unpack [$(embedFile  "core/src/Array.elm")
    ,$(embedFile  "core/src/Graphics/Input/Field.elm")
    ]
    
-{-
-sources = map unpack [$(embedFile  "core/src/Basics.elm")
-    , $(embedFile  "core/src/Maybe.elm")
-    , $(embedFile  "core/src/Result.elm")
-    , $(embedFile  "core/src/Signal.elm")
-    ]   
--}
+
 stdLib :: Map.Map Name Interface
 stdLib = case eitherLib of
   Left s -> error $ "Failed building standard library: " ++ s
   Right dict -> dict
   where 
       eitherLib = do
-        (_, ifaces) <- trace ("Stdlib sources" ++ show (length sources)) $ compileAll "elm-lang" "core" Map.empty sources
+        (_, ifaces) <- compileAll "elm-lang" "core" Map.empty sources
         return ifaces
      --jsSources = 
      

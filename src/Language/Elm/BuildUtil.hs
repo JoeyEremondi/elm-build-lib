@@ -16,8 +16,6 @@ import Language.Haskell.TH.Quote
 
 import qualified Data.List as List
 
---TODO remove
-import Debug.Trace (trace)
 
 uniqueDeps :: String -> Either String (Name, [Name])
 uniqueDeps s = do
@@ -47,7 +45,7 @@ resolveDependencies deps =
       where eitherDepList = do
             edgePairs <- mapM uniqueDeps deps
             let names = map fst edgePairs
-            let edgeMap = trace ("Got dependency map " ++ show ((map (\(nam, edges) -> "Name " ++ (nameToString nam) ++ " Edges " ++ (show $ map nameToString edges ))) edgePairs ) ) $ Map.fromList edgePairs
+            let edgeMap = Map.fromList edgePairs
             --Get predecessors of each node, needed for the top sort
 
             let eitherLookUp :: Name -> Map.Map Name [Name] -> Either String [Name] 
@@ -75,17 +73,17 @@ resolveDependencies deps =
             let topSort _ [] result = return result
                 topSort visited (current:otherNodes) resultSoFar = do
                         currentEdgesAndNatives <- eitherLookUp current edgeMap
-                        let currentEdges = trace ("All edges edges " ++ show (map nameToString currentEdgesAndNatives)) $ filter importNotNative currentEdgesAndNatives
-                        let alreadySeen = trace ("Current edges " ++ show (map nameToString currentEdges)) $ filter (flip Set.member $ visited) currentEdges
+                        let currentEdges = filter importNotNative currentEdgesAndNatives
+                        let alreadySeen = filter (flip Set.member $ visited) currentEdges
                         case alreadySeen of
                             (h:_) -> Left $ "Error: you have a dependency cycle. Your program cannot be compiled. "
                                ++ (nameToString current) ++ " to " ++ (nameToString h)
                             _ -> do
                                 let newVisited = Set.insert current visited
                                 newSources <- filterM (seenAllPred newVisited) currentEdges
-                                trace ("In topsort " ++ (nameToString current) ++ "  " ++ (show $ map nameToString otherNodes) ++ " edges " ++ (show $ map nameToString currentEdges)) $ topSort newVisited (newSources ++ otherNodes) (newSources ++ resultSoFar ) --Build in reverse order
+                                topSort newVisited (newSources ++ otherNodes) (newSources ++ resultSoFar ) --Build in reverse order
 
-            trace ("Initial sources " ++ show (map nameToString initialOpenList)) $ topSort initialVisitedNodes initialOpenList initialResult
+            topSort initialVisitedNodes initialOpenList initialResult
                         
         
 compileAll :: String -> String -> (Map.Map Name Interface) -> [String] -> Either String (String, Map.Map Name Interface)
@@ -94,7 +92,7 @@ compileAll user packageName startIfaces modules = do
     let names = map fst nameDeps
     let nameDict = Map.fromList $ zip names modules
     orderedNames <- resolveDependencies modules
-    let orderedSources =  trace("Got ordered names: " ++ (show $ map nameToString orderedNames) ) $ map (fromJust . (flip Map.lookup $ nameDict)) orderedNames
+    let orderedSources = map (fromJust . (flip Map.lookup $ nameDict)) orderedNames
     compileInOrder user packageName startIfaces orderedSources
 
 
