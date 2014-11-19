@@ -37,19 +37,20 @@ importNotNative name = if (List.isPrefixOf "Native." nameString)
 
   
 --Reorder the dependencies so that we can compile them in order
-resolveDependencies :: [String] -> Either String [Name]
-resolveDependencies deps = 
+resolveDependencies :: (Name -> Bool) -> [String] -> Either String [Name]
+resolveDependencies alreadyHave deps = 
     case eitherDepList of
         Right deps -> Right deps
         Left s -> Left $ "Error resolving dependencies:\n" ++ s
       where eitherDepList = do
+            let notNativeOrCompiled n = importNotNative n && (not $ alreadyHave n)
             edgePairs <- mapM uniqueDeps deps
             let names = map fst edgePairs
             let edgeMap = Map.fromList edgePairs
             --Get predecessors of each node, needed for the top sort
 
             let eitherLookUp :: Name -> Map.Map Name [Name] -> Either String [Name] 
-                eitherLookUp name map = case (importNotNative name, Map.lookup name map) of
+                eitherLookUp name map = case (notNativeOrCompiled name, Map.lookup name map) of
                         (False, _) ->  Right [] --Native modules have no dependencies, are always sinks
                         (True, Nothing) -> Left $  "Dependency not found: " ++ nameToString name
                         (True, Just b) -> Right b
@@ -73,7 +74,7 @@ resolveDependencies deps =
             let topSort _ [] result = return result
                 topSort visited (current:otherNodes) resultSoFar = do
                         currentEdgesAndNatives <- eitherLookUp current edgeMap
-                        let currentEdges = filter importNotNative currentEdgesAndNatives
+                        let currentEdges = filter notNativeOrCompiled currentEdgesAndNatives
                         let alreadySeen = filter (flip Set.member $ visited) currentEdges
                         case alreadySeen of
                             (h:_) -> Left $ "Error: you have a dependency cycle. Your program cannot be compiled. "
@@ -91,7 +92,7 @@ compileAll user packageName startIfaces modules = do
     nameDeps <- mapM uniqueDeps modules
     let names = map fst nameDeps
     let nameDict = Map.fromList $ zip names modules
-    orderedNames <- resolveDependencies modules
+    orderedNames <- resolveDependencies (\n -> Map.member n startIfaces) modules
     let orderedSources = map (fromJust . (flip Map.lookup $ nameDict)) orderedNames
     compileInOrder user packageName startIfaces orderedSources
 
