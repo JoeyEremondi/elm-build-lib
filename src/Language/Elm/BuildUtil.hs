@@ -40,48 +40,52 @@ importNotNative name = if (List.isPrefixOf "Native." nameString)
   
 --Reorder the dependencies so that we can compile them in order
 resolveDependencies :: [String] -> Either String [Name]
-resolveDependencies deps = do
-    edgePairs <- mapM uniqueDeps deps
-    let names = map fst edgePairs
-    let edgeMap = trace ("Got dependency map " ++ show ((map (\(nam, edges) -> "Name " ++ (nameToString nam) ++ " Edges " ++ (show $ map nameToString edges ))) edgePairs ) ) $ Map.fromList edgePairs
-    --Get predecessors of each node, needed for the top sort
+resolveDependencies deps = 
+    case eitherDepList of
+        Right deps -> Right deps
+        Left s -> Left $ "Error resolving dependencies:\n" ++ s
+      where eitherDepList = do
+            edgePairs <- mapM uniqueDeps deps
+            let names = map fst edgePairs
+            let edgeMap = trace ("Got dependency map " ++ show ((map (\(nam, edges) -> "Name " ++ (nameToString nam) ++ " Edges " ++ (show $ map nameToString edges ))) edgePairs ) ) $ Map.fromList edgePairs
+            --Get predecessors of each node, needed for the top sort
 
-    let eitherLookUp :: Name -> Map.Map Name [Name] -> Either String [Name] 
-        eitherLookUp name map = case (importNotNative name, Map.lookup name map) of
-                (False, _) ->  Right [] --Native modules have no dependencies, are always sinks
-                (True, Nothing) -> Left $  "Dependency not found: " ++ nameToString name
-                (True, Just b) -> Right b
-    let n1 `hasEdgeFrom` n2 = case Map.lookup n2 edgeMap of
-                Nothing -> False
-                Just l -> n1 `elem` l
+            let eitherLookUp :: Name -> Map.Map Name [Name] -> Either String [Name] 
+                eitherLookUp name map = case (importNotNative name, Map.lookup name map) of
+                        (False, _) ->  Right [] --Native modules have no dependencies, are always sinks
+                        (True, Nothing) -> Left $  "Dependency not found: " ++ nameToString name
+                        (True, Just b) -> Right b
+            let edgeFromTo n1 n2 = case Map.lookup n1 edgeMap of
+                        Nothing -> False
+                        Just l -> n2 `elem` l
 
-    let predList = zip names $ map (\end -> [start | start <- names, end `hasEdgeFrom` start ]) names
-    let predMap = Map.fromList predList
-    let sources = filter (null . (filter importNotNative) . snd) predList
-    let initialVisitedNodes =  Set.fromList $ map fst sources
-    let initialOpenList = map fst sources
-    let initialResult = map fst sources
-    
-    
-    let seenAllPred :: Set.Set Name -> Name -> Either String Bool
-        seenAllPred visited name = do
-                predList <- eitherLookUp name predMap
-                let unseenPreds = filter (not . (flip Set.member $ visited)) predList
-                return $ null unseenPreds
-    let topSort _ [] result = return result
-        topSort visited (current:otherNodes) resultSoFar = do
-                currentEdgesAndNatives <- eitherLookUp current edgeMap
-                let currentEdges = trace ("All edges edges " ++ show (map nameToString currentEdgesAndNatives)) $ filter importNotNative currentEdgesAndNatives
-                let alreadySeen = trace ("Current edges " ++ show (map nameToString currentEdges)) $ filter (flip Set.member $ visited) currentEdges
-                case alreadySeen of
-                    (h:_) -> Left $ "Error: you have a dependency cycle. Your program cannot be compiled. "
-                       ++ (nameToString current) ++ " to " ++ (nameToString h)
-                    _ -> do
-                        let newVisited = Set.insert current visited
-                        newSources <- filterM (seenAllPred newVisited) currentEdges
-                        trace ("In topsort " ++ (nameToString current) ++ "  " ++ (show $ map nameToString otherNodes) ++ " edges " ++ (show $ map nameToString currentEdges)) $ topSort newVisited (newSources ++ otherNodes) (resultSoFar ++ newSources)
+            let predList = zip names $ map (\end -> [start | start <- names, edgeFromTo start end]) names
+            let predMap = Map.fromList predList
+            let sources = filter (null . snd) predList
+            let initialVisitedNodes =  Set.empty
+            let initialOpenList = map fst sources
+            let initialResult = map fst sources
+            
+            
+            let seenAllPred :: Set.Set Name -> Name -> Either String Bool
+                seenAllPred visited name = do
+                        currentPreds <- eitherLookUp name predMap
+                        let unseenPreds = filter (not . (flip Set.member $ visited)) currentPreds
+                        return  $ null unseenPreds
+            let topSort _ [] result = return result
+                topSort visited (current:otherNodes) resultSoFar = do
+                        currentEdgesAndNatives <- eitherLookUp current edgeMap
+                        let currentEdges = trace ("All edges edges " ++ show (map nameToString currentEdgesAndNatives)) $ filter importNotNative currentEdgesAndNatives
+                        let alreadySeen = trace ("Current edges " ++ show (map nameToString currentEdges)) $ filter (flip Set.member $ visited) currentEdges
+                        case alreadySeen of
+                            (h:_) -> Left $ "Error: you have a dependency cycle. Your program cannot be compiled. "
+                               ++ (nameToString current) ++ " to " ++ (nameToString h)
+                            _ -> do
+                                let newVisited = Set.insert current visited
+                                newSources <- filterM (seenAllPred newVisited) currentEdges
+                                trace ("In topsort " ++ (nameToString current) ++ "  " ++ (show $ map nameToString otherNodes) ++ " edges " ++ (show $ map nameToString currentEdges)) $ topSort newVisited (newSources ++ otherNodes) (newSources ++ resultSoFar ) --Build in reverse order
 
-    trace ("Initial sources " ++ show (map ((map nameToString) . snd) sources)) $ topSort initialVisitedNodes initialOpenList initialResult
+            trace ("Initial sources " ++ show (map nameToString initialOpenList)) $ topSort initialVisitedNodes initialOpenList initialResult
                         
         
 compileAll :: String -> String -> (Map.Map Name Interface) -> [String] -> Either String (String, Map.Map Name Interface)
@@ -103,6 +107,11 @@ compileInOrder user packageName startIfaces modules = helper modules startIfaces
       helper [] ifaces src = return (src, ifaces)
       helper (modul:otherModules) compiledModules _ = do
           name <- elmModuleName modul
-          (newModule, src) <- compile user packageName modul compiledModules
+          (newModule, src) <- compileWithName name user packageName modul compiledModules
           let newCompiled = Map.insert name newModule compiledModules
           helper otherModules newCompiled src   
+          
+--Helper for better error messages when compiling
+compileWithName name user packageName modul compiledModules = case (compile user packageName modul compiledModules) of
+  Left s -> Left $ "Error compiling module " ++ (nameToString name) ++ "\n" ++ s
+  Right ret -> Right ret
