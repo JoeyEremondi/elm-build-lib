@@ -11,7 +11,51 @@ import qualified Data.Map as Map
 import Control.Monad
 
 import Data.ByteString.Char8 (unpack)
+
+import Data.Maybe (fromJust)
+
+header :: String
+header =
+   "var Elm = Elm || { Native: {} };\n"
   
+runtime = (fromJust $ nameFromString "Runtime", unpack $(embedFile  "core/src/Native/Runtime.js") )
+
+nativeDict = Map.fromList nativePairs
+  where 
+    nativePairs = map (\(n,t) -> (fromJust $ nameFromString n, unpack t)) nativeTextPairs
+    nativeTextPairs = [
+        ("Native.Array", $(embedFile  "core/src/Native/Array.js"))
+        , ("Native.Basics", $(embedFile  "core/src/Native/Basics.js"))
+        , ("Native.Bitwise", $(embedFile  "core/src/Native/Bitwise.js"))
+        , ("Native.Char", $(embedFile  "core/src/Native/Char.js"))
+        , ("Native.Color", $(embedFile  "core/src/Native/Color.js"))
+        , ("Native.Date", $(embedFile  "core/src/Native/Date.js"))
+        , ("Native.Debug", $(embedFile  "core/src/Native/Debug.js"))
+        , ("Native.Http", $(embedFile  "core/src/Native/Http.js"))
+        , ("Native.Json", $(embedFile  "core/src/Native/Json.js"))
+        , ("Native.Keyboard", $(embedFile  "core/src/Native/Keyboard.js"))
+        , ("Native.List", $(embedFile  "core/src/Native/List.js"))
+        , ("Native.Mouse", $(embedFile  "core/src/Native/Mouse.js"))
+        , ("Native.Ports", $(embedFile  "core/src/Native/Ports.js"))
+        , ("Native.Regex", $(embedFile  "core/src/Native/Regex.js"))
+        , ("Native.Show", $(embedFile  "core/src/Native/Show.js"))
+        , ("Native.Signal", $(embedFile  "core/src/Native/Signal.js"))
+        , ("Native.String", $(embedFile  "core/src/Native/String.js"))
+        , ("Native.Text", $(embedFile  "core/src/Native/Text.js"))
+        , ("Native.Time", $(embedFile  "core/src/Native/Time.js"))
+        , ("Native.Touch", $(embedFile  "core/src/Native/Touch.js"))
+        , ("Native.Trampoline", $(embedFile  "core/src/Native/Trampoline.js"))
+        , ("Native.Transform2D", $(embedFile  "core/src/Native/Transform2D.js"))
+        , ("Native.Utils", $(embedFile  "core/src/Native/Utils.js"))
+        , ("Native.WebSocket", $(embedFile  "core/src/Native/WebSocket.js"))
+        , ("Native.Window", $(embedFile  "core/src/Native/Window.js"))
+        
+        , ("Native.Graphics.Collage", $(embedFile  "core/src/Native/Graphics/Collage.js"))
+        , ("Native.Graphics.Element", $(embedFile  "core/src/Native/Graphics/Element.js"))
+        , ("Native.Graphics.Input", $(embedFile  "core/src/Native/Graphics/Input.js"))
+
+
+        ]
 
 sources = map unpack [$(embedFile  "core/src/Array.elm")
    ,$(embedFile  "core/src/Array.elm")
