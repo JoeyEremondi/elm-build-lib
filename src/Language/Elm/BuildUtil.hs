@@ -17,6 +17,10 @@ import Language.Haskell.TH.Quote
 import qualified Data.List as List
 
 
+--Dict of JS and Interfaces that have already been compiled
+type CompileResult = (Map.Map Name String, Map.Map Name Interface)
+
+
 uniqueDeps :: String -> Either String (Name, [Name])
 uniqueDeps s = do
   (name, deps) <- parseDependencies s
@@ -87,28 +91,29 @@ resolveDependencies alreadyHave deps =
             topSort initialVisitedNodes initialOpenList initialResult
                         
         
-compileAll :: String -> String -> (Map.Map Name Interface) -> [String] -> Either String (String, Map.Map Name Interface)
-compileAll user packageName startIfaces modules = do
+compileAll :: String -> String -> CompileResult -> [String] -> Either String CompileResult
+compileAll user packageName (startJS, startIfaces) modules = do
     nameDeps <- mapM uniqueDeps modules
     let names = map fst nameDeps
     let nameDict = Map.fromList $ zip names modules
     orderedNames <- resolveDependencies (\n -> Map.member n startIfaces) modules
     let orderedSources = map (fromJust . (flip Map.lookup $ nameDict)) orderedNames
-    compileInOrder user packageName startIfaces orderedSources
+    compileInOrder user packageName (startJS, startIfaces) orderedSources
 
 
 
 
 
-compileInOrder :: String -> String -> (Map.Map Name Interface) -> [String] -> Either String (String, Map.Map Name Interface)
-compileInOrder user packageName startIfaces modules = helper modules startIfaces ""
+compileInOrder :: String -> String -> CompileResult -> [String] -> Either String CompileResult
+compileInOrder user packageName alreadyCompiled modules = helper modules alreadyCompiled
     where
-      helper [] ifaces src = return (src, ifaces)
-      helper (modul:otherModules) compiledModules _ = do
+      helper [] ret = return ret
+      helper (modul:otherModules) (compiledJS, compiledIfaces) = do
           name <- elmModuleName modul
-          (newModule, src) <- compileWithName name user packageName modul compiledModules
-          let newCompiled = Map.insert name newModule compiledModules
-          helper otherModules newCompiled src   
+          (newModule, src) <- compileWithName name user packageName modul compiledIfaces
+          let newSources = Map.insert name src compiledJS
+          let newIfaces = Map.insert name newModule compiledIfaces
+          helper otherModules (newSources, newIfaces)
           
 --Helper for better error messages when compiling
 compileWithName name user packageName modul compiledModules = case (compile user packageName modul compiledModules) of

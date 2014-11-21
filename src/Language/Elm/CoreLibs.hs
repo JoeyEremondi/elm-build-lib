@@ -18,7 +18,7 @@ header :: String
 header =
    "var Elm = Elm || { Native: {} };\n"
   
-runtime = (fromJust $ nameFromString "Runtime", unpack $(embedFile  "core/src/Native/Runtime.js") )
+runtime = (fromJust $ nameFromString "Runtime", header ++ unpack $(embedFile  "core/src/Native/Runtime.js") )
 
 nativeDict = Map.fromList nativePairs
   where 
@@ -96,14 +96,12 @@ sources = map unpack [$(embedFile  "core/src/Array.elm")
    ]
    
 
-stdLib :: Map.Map Name Interface
+stdLib :: CompileResult
 stdLib = case eitherLib of
   Left s -> error $ "Failed building standard library: " ++ s
   Right dict -> dict
   where 
-      eitherLib = do
-        (_, ifaces) <- compileAll "elm-lang" "core" Map.empty sources
-        return ifaces
+      eitherLib = compileAll "elm-lang" "core" (Map.empty, Map.empty) sources
      --jsSources = 
      
      

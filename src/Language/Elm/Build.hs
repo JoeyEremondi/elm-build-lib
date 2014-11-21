@@ -1,4 +1,10 @@
-module Language.Elm.Build (compileAll, deriveElmJS) where
+module Language.Elm.Build (
+  compileAll 
+  , standalone
+  , addHeader
+  ,deriveElmJS
+  , elmQuasi
+  ) where
 
 import qualified Data.Map as Map
 
@@ -19,26 +25,43 @@ import qualified Elm.Compiler.Module as Module
 
 {-#
 Given a list of strings containing the source code for elm modules,
-return a string containing the compiled JavaScript source,
-and a list of name-javascript pairs of the runtime/native modules 
-the main source depends on.
+return a dictionary mapping names to their compiled JavaScript source.
+(This allows you to staticaly serve commonly used modules, such as the runtime).
+The runtime is included in this dictionary, with the key `Runtime`.
 Gives a string error in the event of failure.
 -}
-compileAll ::  [String] -> Either String (String, [(Module.Name, String)])
+compileAll ::  [String] -> Either String (Map.Map Module.Name String)
 compileAll modules = do
-  (src, _ifaces) <- Util.compileAll "" "" stdLib modules
-  return (header ++ src, [runtime] ++ Map.toList nativeDict)
+  (sources, _ifaces) <- Util.compileAll "" "" stdLib modules
+  let sourcesWithNatives = Map.insert (fst runtime) (snd runtime) (Map.union sources nativeDict)
+  return sourcesWithNatives
+
   
+{-|
+Bundle the result of compilation into a single, standalone, JavaScript source file,
+including the Elm-runtime and the Elm header
+|-}
+standalone :: (Map.Map Module.Name String) -> String
+standalone result = addHeader $ concatMap snd $ Map.toList result
+
+{-|
+Add the JavaScript header which initializes the Elm object
+and allows sources to work together.
+|-}
+addHeader :: String -> String
+addHeader  = (header ++)
+
+
 elmQuasi :: QuasiQuoter
 elmQuasi = QuasiQuoter { quoteExp = \s -> deriveElmJS [s],
-                       quotePat = \s -> TH.litP $ TH.stringL s,
-                       quoteType = \s -> error "Can't use Elm quasiQuoter in type position",
-                       quoteDec = \s -> error "Can't use Elm quasiQuoter in dec position"
+                       quotePat = \_s -> error "Can't use Elm quasiQuoter in pattern position",
+                       quoteType = \_s -> error "Can't use Elm quasiQuoter in type position",
+                       quoteDec = \_s -> error "Can't use Elm quasiQuoter in dec position"
                        }  
   
 deriveElmJS :: [String] -> TH.ExpQ
-deriveElmJS modules = case compileAll modules of
-    Right (s, _) -> TH.litE $ TH.stringL s
+deriveElmJS modules = case (standalone `fmap` compileAll modules) of
+    Right s -> TH.litE $ TH.stringL s
     Left err -> error $ "Error compiling Elm code:\n" ++ err
 
 
