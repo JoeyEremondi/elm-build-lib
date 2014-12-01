@@ -8,7 +8,7 @@ License: BSD3
 License-file: LICENSE
 
 name:           elm-build-lib
-version:        0.0.2
+version:        0.0.3
 cabal-version:  >=1.6
 build-type:     Simple
 author:         Joey Eremondi
