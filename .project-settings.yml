@@ -15,12 +15,10 @@ extra-packages: ! 'Hackage: prettyclass 1.0.0.0
 
   Hackage: union-find 0.2
 
-  Hackage: highlighting-kate 0.5.9
-
   Hackage: aeson-pretty 0.7.1
 
-  Hackage: cheapskate 0.1.0.1
+  Git: https://github.com/elm-lang/elm-compiler.git 629a71d8e88da1e3ba8fa1827729837623dff51e
 
-  Git: https://github.com/elm-lang/elm-compiler.git e547fdd13262514b1b8131b12f3fd15cf685ff0f'
+  Git: https://github.com/JoeyEremondi/core.git d9404abd4ad04cccd02fcaec91c61d8a9414b79b'
 ghc-args: []
 excluded-modules: []

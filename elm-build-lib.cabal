@@ -38,6 +38,7 @@ library
   hs-source-dirs:  src
 
   build-depends:   base >=4.2 && <5
+                   , elm-core-sources,
                    , elm-compiler
                    , containers
                    , template-haskell

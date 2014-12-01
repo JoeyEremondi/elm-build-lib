@@ -46,7 +46,8 @@ resolveDependencies alreadyHave deps =
     case eitherDepList of
         Right deps -> Right deps
         Left s -> Left $ "Error resolving dependencies:\n" ++ s
-      where eitherDepList = do
+      where 
+        eitherDepList = do
             let notNativeOrCompiled n = importNotNative n && (not $ alreadyHave n)
             edgePairs <- mapM uniqueDeps deps
             let names = map fst edgePairs

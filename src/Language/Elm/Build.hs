@@ -23,7 +23,7 @@ import qualified  Language.Elm.BuildUtil as Util
 import Language.Elm.CoreLibs
 import qualified Elm.Compiler.Module as Module
 
-{-#
+{-|
 Given a list of strings containing the source code for elm modules,
 return a dictionary mapping names to their compiled JavaScript source.
 (This allows you to staticaly serve commonly used modules, such as the runtime).
