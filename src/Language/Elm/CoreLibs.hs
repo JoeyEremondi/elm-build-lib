@@ -45,8 +45,8 @@ stdLib  = case eitherLib of
 
 --Given a dependency list, return the compile result of the corresponding stdlib
 stdLibForSources :: [String] -> Either String CompileResult
-stdLibForSources deps = do
-    libDeps <- stdLibDeps deps
+stdLibForSources modules = do
+    libDeps <- filter (importNotNative) `fmap` stdLibDeps modules
     let (allJs, allIfaces) = stdLib
     let js = Map.filterWithKey (\d _ -> List.elem d libDeps ) allJs
     let ifaces = Map.filterWithKey (\d _ -> List.elem d libDeps ) allIfaces
@@ -64,3 +64,9 @@ stdLibDeps modules = do
     --Get dependencies of dependencies
     let allDeps =  concat $ map (\libName -> internalDeps Map.! libName) topLevelDeps
     return $ List.nub $ topLevelDeps ++ allDeps
+
+nativesForSources :: [String] -> Either String (Map.Map Name String)
+nativesForSources modules = do
+    libDeps <- stdLibDeps modules
+    let nativeNames = List.filter (not . importNotNative ) libDeps
+    return $ Map.filterWithKey (\d _ -> List.elem d nativeNames) nativeDict
