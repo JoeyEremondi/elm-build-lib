@@ -34,7 +34,8 @@ Gives a string error in the event of failure.
 -}
 compileAll ::  [String] -> Either String (Map.Map Module.Name String)
 compileAll modules = do
-  (sources, _ifaces) <- Util.compileAll "" "" stdLib modules
+  ourStdlib <- stdLibForSources modules
+  (sources, _ifaces) <- Util.compileAll "" "" ourStdlib modules
   let sourcesWithNatives = Map.insert (fst runtime) (snd runtime) (Map.union sources nativeDict)
   return sourcesWithNatives
 

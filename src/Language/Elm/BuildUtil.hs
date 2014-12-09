@@ -38,7 +38,6 @@ importNotNative name = if (List.isPrefixOf "Native." nameString)
   where nameString = nameToString name  
 
 
-
   
 --Reorder the dependencies so that we can compile them in order
 resolveDependencies :: (Name -> Bool) -> [String] -> Either String [Name]
