@@ -8,6 +8,7 @@ import Elm.Compiler
 import Elm.Compiler.Module
 
 import qualified Data.Map as Map
+import qualified Data.List as List
 import Control.Monad
 
 import Data.ByteString.Char8 (unpack)
@@ -30,9 +31,9 @@ sources = Sources.stdlibSources
    
 
 stdLib :: CompileResult
-stdLib = case eitherLib of
+stdLib  = case eitherLib of
   Left s -> error $ "Failed building standard library: " ++ s
-  Right dict -> dict
+  Right dict -> dict -- Map.filterWithKey (\ d _ -> List.elem d deps) dict
   where 
       eitherLib = compileAll "elm-lang" "core" (Map.empty, Map.empty) sources
      --jsSources = 

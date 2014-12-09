@@ -17,8 +17,8 @@ extra-packages: ! 'Hackage: prettyclass 1.0.0.0
 
   Hackage: aeson-pretty 0.7.1
 
-  Git: https://github.com/elm-lang/elm-compiler.git 629a71d8e88da1e3ba8fa1827729837623dff51e
+  Git: https://github.com/elm-lang/elm-compiler.git 12af2306abbbb5817d4dde7efe4e7cb2f9d12c42
 
-  Git: https://github.com/JoeyEremondi/core.git d9404abd4ad04cccd02fcaec91c61d8a9414b79b'
+  Git: https://github.com/JoeyEremondi/core.git a4b0ee17150508ef6a41bce0153153bcb1b8cc3c'
 ghc-args: []
 excluded-modules: []

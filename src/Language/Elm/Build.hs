@@ -23,6 +23,8 @@ import qualified  Language.Elm.BuildUtil as Util
 import Language.Elm.CoreLibs
 import qualified Elm.Compiler.Module as Module
 
+import Data.List (intercalate)
+
 {-|
 Given a list of strings containing the source code for elm modules,
 return a dictionary mapping names to their compiled JavaScript source.
@@ -42,7 +44,7 @@ Bundle the result of compilation into a single, standalone, JavaScript source fi
 including the Elm-runtime and the Elm header
 |-}
 standalone :: (Map.Map Module.Name String) -> String
-standalone result = addHeader $ concatMap snd $ Map.toList result
+standalone result = addHeader $ intercalate "" $ map snd $ Map.toList result
 
 {-|
 Add the JavaScript header which initializes the Elm object

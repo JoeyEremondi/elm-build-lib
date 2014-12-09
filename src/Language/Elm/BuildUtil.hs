@@ -100,6 +100,7 @@ compileAll user packageName (startJS, startIfaces) modules = do
     orderedNames <- resolveDependencies (\n -> Map.member n startIfaces) modules
     let orderedSources = map (fromJust . (flip Map.lookup $ nameDict)) orderedNames
     compileInOrder user packageName (startJS, startIfaces) orderedSources
+    
 
 
 
