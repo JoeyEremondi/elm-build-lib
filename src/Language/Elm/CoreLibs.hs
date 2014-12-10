@@ -58,12 +58,23 @@ moduleStdlibDeps s = do
   let stdlibDeps = filter (\d -> Map.member d (fst stdLib)) deps
   return $ List.nub stdlibDeps
 
+--Keep adding dependencies of dependencies until we're done
+--TODO this is slow and awful. Do a proper DFS
+traverseDeps :: [Name] ->  [Name]
+traverseDeps startDeps = let 
+    nextLevelDeps = concat $ map (\libName -> internalDeps Map.! libName) startDeps
+    uniqueDeps = List.nub $ startDeps ++ nextLevelDeps
+  in 
+    if (length uniqueDeps == length startDeps)
+    then uniqueDeps
+    else traverseDeps uniqueDeps
+    
+
 stdLibDeps :: [String] -> Either String [Name]
 stdLibDeps modules = do
     topLevelDeps <- (List.nub . concat) `fmap` mapM moduleStdlibDeps modules
     --Get dependencies of dependencies
-    let allDeps =  concat $ map (\libName -> internalDeps Map.! libName) topLevelDeps
-    return $ List.nub $ topLevelDeps ++ allDeps
+    return $ traverseDeps topLevelDeps
 
 nativesForSources :: [String] -> Either String (Map.Map Name String)
 nativesForSources modules = do
