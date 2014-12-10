@@ -61,8 +61,9 @@ moduleStdlibDeps s = do
 --Keep adding dependencies of dependencies until we're done
 --TODO this is slow and awful. Do a proper DFS
 traverseDeps :: [Name] ->  [Name]
-traverseDeps startDeps = let 
-    nextLevelDeps = concat $ map (\libName -> internalDeps Map.! libName) startDeps
+traverseDeps startDeps = let
+    notNativeStartDeps = filter (importNotNative) startDeps
+    nextLevelDeps = concat $ map (\libName -> internalDeps Map.! libName) notNativeStartDeps
     uniqueDeps = List.nub $ startDeps ++ nextLevelDeps
   in 
     if (length uniqueDeps == length startDeps)
