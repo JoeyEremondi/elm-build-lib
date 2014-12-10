@@ -74,6 +74,7 @@ traverseDeps startDeps = let
 stdLibDeps :: [String] -> Either String [Name]
 stdLibDeps modules = do
     topLevelDeps <- (List.nub . concat) `fmap` mapM moduleStdlibDeps modules
+    let topWithDefaults = List.nub (topLevelDeps ++ defaultImports)
     --Get dependencies of dependencies
     return $ traverseDeps topLevelDeps
 
