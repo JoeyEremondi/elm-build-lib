@@ -49,7 +49,7 @@ Bundle the result of compilation into a single, standalone, JavaScript source fi
 including the Elm-runtime and the Elm header
 |-}
 standalone :: (Map.Map Module.Name String) -> String
-standalone result = addHeader $ intercalate "" $ map snd $ Map.toList result
+standalone result = addHeader $ intercalate "\n" $ map snd $ sort $ Map.toList result
 
 {-|
 Add the JavaScript header which initializes the Elm object
