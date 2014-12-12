@@ -34,9 +34,10 @@ Gives a string error in the event of failure.
 -}
 compileAll ::  [String] -> Either String (Map.Map Module.Name String)
 compileAll modules = do
-  ourStdlib <- stdLibForSources modules
-  ourNatives <- nativesForSources modules
-  (sources, _ifaces) <- Util.compileAll "" "" ourStdlib modules
+  ourDeps <- Map.fromList `fmap` mapM Util.uniqueDeps modules
+  ourStdlib <- stdLibForSources ourDeps modules
+  ourNatives <- nativesForSources ourDeps
+  (sources, _ifaces) <- Util.compileAll ourDeps "" "" ourStdlib modules
   let sourcesWithNatives = Map.insert (fst runtime) (snd runtime) (Map.union sources ourNatives)
   return sourcesWithNatives
 
