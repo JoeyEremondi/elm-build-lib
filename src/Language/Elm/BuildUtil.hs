@@ -16,7 +16,6 @@ import Language.Haskell.TH.Quote
 
 import qualified Data.List as List
 
-
 --Dict of JS and Interfaces that have already been compiled
 type CompileResult = (Map.Map Name String, Map.Map Name Interface)
 
@@ -37,9 +36,11 @@ importNotNative name = if (List.isPrefixOf "Native." nameString)
   else True 
   where nameString = nameToString name  
 
+stringPairs pairs = map (\(n, nList) -> (nameToString n, map nameToString nList)) pairs
 
   
 --Reorder the dependencies so that we can compile them in order
+--Already have: bool indicating whether a dependency is already in our list of 
 resolveDependencies :: (Name -> Bool) -> [String] -> Either String [Name]
 resolveDependencies alreadyHave deps = 
     case eitherDepList of

@@ -29,11 +29,12 @@ nativeDict = Map.fromList nativePairs
 
 sources = Sources.stdlibSources
 
+
 --Dependencies standard lib modules have with each other
 internalDeps :: Map.Map Name [Name]
 internalDeps = case (mapM parseDependencies sources) of
     Left s -> error $ "Failed parsing stdlib:" ++ s
-    Right pairs -> Map.fromList pairs
+    Right pairs ->  Map.fromList pairs
 
 stdLib :: CompileResult
 stdLib  = case eitherLib of
@@ -76,7 +77,7 @@ stdLibDeps modules = do
     topLevelDeps <- (List.nub . concat) `fmap` mapM moduleStdlibDeps modules
     let topWithDefaults = List.nub (topLevelDeps ++ defaultImports)
     --Get dependencies of dependencies
-    return $ traverseDeps topLevelDeps
+    return $ traverseDeps topWithDefaults
 
 nativesForSources :: [String] -> Either String (Map.Map Name String)
 nativesForSources modules = do
