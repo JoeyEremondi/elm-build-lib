@@ -32,17 +32,20 @@ sources = Sources.stdlibSources
 
 
 --Dependencies standard lib modules have with each other
-internalDeps :: Dependencies
-internalDeps = case (mapM uniqueDeps sources) of
+internalDepsPairs = case (mapM uniqueDeps sources) of
     Left s -> error $ "Failed parsing stdlib:" ++ s
-    Right pairs ->  Map.fromList pairs
+    Right pairs ->  pairs
+
+internalDeps :: Dependencies
+internalDeps = Map.fromList internalDepsPairs
 
 stdLib :: CompileResult
 stdLib  = case eitherLib of
   Left s -> error $ "Failed building standard library: " ++ s
   Right dict -> dict
   where 
-      eitherLib = compileAll internalDeps "elm-lang" "core" (Map.empty, Map.empty) sources
+      sourcesDict = Map.fromList $ zip (map fst internalDepsPairs) sources
+      eitherLib = compileAll internalDeps "elm-lang" "core" (Map.empty, Map.empty) sourcesDict
      --jsSources = 
 
 --Given a dependency list, return the compile result of the corresponding stdlib

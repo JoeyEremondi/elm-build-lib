@@ -107,12 +107,12 @@ resolveDependencies alreadyHave edgeMap names =
             topSort initialVisitedNodes (initialOpenList) ( initialResult)
                         
         
-compileAll :: Dependencies -> String -> String -> CompileResult -> [String] -> Either String CompileResult
-compileAll deps user packageName (startJS, startIfaces) modules = do
+compileAll :: Dependencies -> String -> String -> CompileResult -> Map.Map Name String -> Either String CompileResult
+compileAll deps user packageName (startJS, startIfaces) nameDict = do
     --nameDeps <- mapM uniqueDeps modules
     let names = Map.keys deps
     --let allNames = traverseDeps deps names
-    let nameDict = Map.fromList $ zip names modules
+    --let nameDict = Map.fromList $ zip names modules
     orderedNames <- resolveDependencies (\n -> Map.member n startIfaces) deps names
     let orderedSources = map (fromJust . (flip Map.lookup $ nameDict)) orderedNames
     compileInOrder user packageName (startJS, startIfaces) orderedSources
@@ -123,11 +123,12 @@ compileAll deps user packageName (startJS, startIfaces) modules = do
 
 
 compileInOrder :: String -> String -> CompileResult -> [String] -> Either String CompileResult
-compileInOrder user packageName alreadyCompiled modules = helper modules alreadyCompiled
+compileInOrder user packageName alreadyCompiled modules =  helper modules alreadyCompiled
     where
       helper [] ret = return ret
       helper (modul:otherModules) (compiledJS, compiledIfaces) = do
           name <- elmModuleName modul
+          let ifaceNames = Map.keys compiledIfaces
           (newModule, src) <- compileWithName name user packageName modul compiledIfaces
           let newSources = Map.insert name src compiledJS
           let newIfaces = Map.insert name newModule compiledIfaces
