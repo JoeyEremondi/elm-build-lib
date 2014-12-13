@@ -44,9 +44,9 @@ import Data.List (intercalate)
 
 
 {-|
-Given a list of strings containing the source code for elm modules,
+Given a list of strings containing the source code for Elm modules,
 return a dictionary mapping names to their compiled JavaScript source.
-(This allows you to staticaly serve commonly used modules, such as the runtime).
+(This allows you to statically serve commonly used modules, such as the runtime).
 The runtime is included in this dictionary, with the key \"Elm.Native.Runtime\".
 Gives a string error in the event of failure.
 -}
@@ -62,7 +62,7 @@ compileAll modules = do
   return sourcesWithNatives
 
 {-|
-Given a list of strings containing the source code for elm modules,
+Given a list of strings containing the source code for Elm modules,
 compile the modules and
 bundle the result of compilation into a single, standalone, JavaScript source file,
 including the Elm-runtime and the Elm header.
@@ -73,7 +73,7 @@ compileAndLinkAll modules = standalone `fmap` (compileAll modules)
   
 {-|
 Bundle the result of compilation into a single, standalone, JavaScript source file,
-including the Elm-runtime and the Elm header
+including the Elm-runtime and the Elm header.
 -}
 standalone :: (Map.Map Module.Name String) -> String
 standalone result = 
@@ -91,11 +91,11 @@ addHeader  = (header ++)
 
 
 -- |
--- Derives the Template Haskell String literal correspondeing to the compiled and linked
--- JavaScript for a given module
+-- Derives the Template Haskell String literal corresponding to the compiled and linked
+-- JavaScript for a given module.
 -- For example:
 -- 
--- > {-#Language QuasiQuotes#-}
+-- > {-# LANGUAGE QuasiQuotes #-}
 -- > myElmJS :: String
 -- > myElmJS = [elmQuasi|
 --  >     module Main where
@@ -104,8 +104,8 @@ addHeader  = (header ++)
 -- 
 -- 
 -- This function is useful for small code snippets, but when dealing with
--- multi-module Elm projects, deriveElmJS should be used.
--- Note that the elm code is compiled to JS at when your Haskell code is compiled. 
+-- multi-module Elm projects, 'deriveElmJS' should be used.
+-- Note that the Elm code is compiled to JS at when your Haskell code is compiled. 
 elmQuasi :: QuasiQuoter
 elmQuasi = QuasiQuoter { quoteExp = \s -> deriveElmJS [s],
                        quotePat = \_s -> error "Can't use Elm quasiQuoter in pattern position",
@@ -115,7 +115,7 @@ elmQuasi = QuasiQuoter { quoteExp = \s -> deriveElmJS [s],
                      
                        
 -- |
--- Derives the Template Haskell String literal correspondeing to the compiled and linked
+-- Derives the Template Haskell String literal corresponding to the compiled and linked
 -- JavaScript from compiling the given modules.
 -- For example:
 -- 
