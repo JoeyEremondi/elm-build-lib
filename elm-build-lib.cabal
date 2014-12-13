@@ -1,7 +1,10 @@
 Name: elm-build-lib
 Version: 0.0.2
-Synopsis:       Elm compiler wrapper
-Description:     Wrappers around the Elm binary to compile elm source strings into Javascript within Haskell
+Synopsis:       Compile Elm code to JS within Haskell
+Description:    This library provides both runtime and Template Haskell functions which let you take multi-module
+    Elm Programs and compile them to JavaScript.
+    The main goal of this is to allow Elm to be used as a frontend for Haskell servers or Web apps.
+    The library is independent of any specific framework, so it should work with Yesod, Snap, Happstack, Scotty, etc.
 Homepage: http://github.com/JoeyEremondi/elm-build-lib
 
 License: BSD3

@@ -21,7 +21,7 @@ import qualified Language.Elm.CoreSources as Sources
 header :: String
 header = Sources.header
   
-runtime = (fromJust $ nameFromString "Runtime", Sources.runtime)
+runtime = (fromJust $ nameFromString "Elm.Native.Runtime", Sources.runtime)
 
 nativeDict = Map.fromList nativePairs
   where 
