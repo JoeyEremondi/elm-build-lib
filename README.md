@@ -8,8 +8,7 @@ and compile them to JavaScript.
 The main goal of this is to allow Elm to be used as a frontend for Haskell servers or Web apps. 
 The library is independent of any specific framework, so it should work with Yesod, Snap, Happstack, Scotty, etc. 
 
-The Haddock docs are currently broken. A temporary copy of the docs can be found
-[here](http://eremondi.com/elm-build-lib/Language-Elm-Build.html).
+You can find this package on [Hackage](http://hackage.haskell.org/package/elm-build-lib).
 
 ##Examples
 
