@@ -47,7 +47,7 @@ import Data.List (intercalate)
 Given a list of strings containing the source code for elm modules,
 return a dictionary mapping names to their compiled JavaScript source.
 (This allows you to staticaly serve commonly used modules, such as the runtime).
-The runtime is included in this dictionary, with the key `Elm.Native.Runtime`.
+The runtime is included in this dictionary, with the key \"Elm.Native.Runtime\".
 Gives a string error in the event of failure.
 -}
 compileAll ::  [String] -> Either String (Map.Map Module.Name String)
@@ -95,13 +95,12 @@ addHeader  = (header ++)
 -- JavaScript for a given module
 -- For example:
 -- 
--- >
 -- > {-#Language QuasiQuotes#-}
 -- > myElmJS :: String
 -- > myElmJS = [elmQuasi|
 --  >     module Main where
 --  >    x = 3
--- > ]
+-- > |]
 -- 
 -- 
 -- This function is useful for small code snippets, but when dealing with
@@ -120,7 +119,6 @@ elmQuasi = QuasiQuoter { quoteExp = \s -> deriveElmJS [s],
 -- JavaScript from compiling the given modules.
 -- For example:
 -- 
--- > 
 -- > {-# LANGUAGE TemplateHaskell #-}
 -- > myElmJS :: String
 -- > myElmJS = $(deriveElmJS [myElmMain, someElmHelperLib])

@@ -22,23 +22,26 @@ type CompileResult = (Map.Map Name String, Map.Map Name Interface)
 
 type Dependencies = Map.Map Name (Set.Set Name)
 
-
+--Return the name of a module, and the set of modules it imports
 uniqueDeps :: String -> Either String (Name, Set.Set Name)
 uniqueDeps s = do
   (name, deps) <- parseDependencies s
   return (name, Set.fromList deps)
 
+--Given the source for a module, find its module name
 elmModuleName :: String -> Either String Elm.Compiler.Module.Name
 elmModuleName modul = do
     (name, _) <- uniqueDeps modul
     return name
 
+--Test if an import starts with "Native."
 importNotNative :: Name -> Bool
 importNotNative name = if (List.isPrefixOf "Native." nameString)
   then False
   else True 
   where nameString = nameToString name  
 
+--Useful helper for printing dependencies
 stringPairs pairs = map (\(n, nList) -> (nameToString n, map nameToString nList)) pairs
 
 --Keep adding dependencies of dependencies until we're done
@@ -106,7 +109,9 @@ resolveDependencies alreadyHave edgeMap names =
 
             topSort initialVisitedNodes (initialOpenList) ( initialResult)
                         
-        
+-- Given the dependency graph for modules, the user and package name used by Elm.Compiler
+-- some already compiled modules (i.e. the stdlib)     
+-- and a map from module names to their sources, compile the sources to JavaScript   
 compileAll :: Dependencies -> String -> String -> CompileResult -> Map.Map Name String -> Either String CompileResult
 compileAll deps user packageName (startJS, startIfaces) nameDict = do
     --nameDeps <- mapM uniqueDeps modules
@@ -117,11 +122,9 @@ compileAll deps user packageName (startJS, startIfaces) nameDict = do
     let orderedSources = map (fromJust . (flip Map.lookup $ nameDict)) orderedNames
     compileInOrder user packageName (startJS, startIfaces) orderedSources
     
-
-
-
-
-
+-- Given the user and package name Elm.Compile uses, some pre-compiled modules
+-- and an ordered list of sources, compile them from left to right, using the
+-- results of previous compilation at each step
 compileInOrder :: String -> String -> CompileResult -> [String] -> Either String CompileResult
 compileInOrder user packageName alreadyCompiled modules =  helper modules alreadyCompiled
     where

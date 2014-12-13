@@ -1,5 +1,5 @@
-Name: elm-build-lib
-Version: 0.0.2
+name:           elm-build-lib
+version:        0.0.3
 Synopsis:       Compile Elm code to JS within Haskell
 Description:    This library provides both runtime and Template Haskell functions which let you take multi-module
     Elm Programs and compile them to JavaScript.
@@ -10,8 +10,7 @@ Homepage: http://github.com/JoeyEremondi/elm-build-lib
 License: BSD3
 License-file: LICENSE
 
-name:           elm-build-lib
-version:        0.0.3
+
 cabal-version:  >=1.6
 build-type:     Simple
 author:         Joey Eremondi
