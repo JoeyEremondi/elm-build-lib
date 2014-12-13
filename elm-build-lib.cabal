@@ -19,14 +19,6 @@ Copyright:      Copyright: (c) 2014 Joey Eremondi
 
 Category: Compiler, Language
 
-Extra-source-files: core/src/*.elm
-    
-    ,core/src/Json/*.elm
-
-    ,core/src/Graphics/*.elm
-     
-    ,core/src/Graphics/Input/*.elm
-
 source-repository head
   type: git
   location: git://github.com/JoeyEremondi/elm-build-lib
