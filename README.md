@@ -41,3 +41,6 @@ fooSource = "module Foo where\nx=3"
 myJS :: String
 myJS = $(deriveElmJS [mainSource, fooSource])
 ```
+
+This uses TemplateHaskell to do the Elm->JS conversion when Haskell compiles, so
+that you don't recompile your code every time you serve its JavaScript.
