@@ -95,7 +95,7 @@ addHeader  = (header ++)
 -- JavaScript for a given module.
 -- For example:
 -- 
--- > {-#Language QuasiQuotes#-}
+-- > {-# LANGUAGE QuasiQuotes #-}
 -- > myElmJS :: String
 -- > myElmJS = [elmQuasi|
 --  >     module Main where
